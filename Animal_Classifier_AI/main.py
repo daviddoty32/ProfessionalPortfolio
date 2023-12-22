@@ -1,6 +1,7 @@
 from tensorflow import keras
 import tensorflow as tf
-
+import numpy as np
+import PIL
 import os
 
 
@@ -53,25 +54,42 @@ def model_train(model_name, data):
 
     model.save(model_name)
 
+
 def model_test(model_name, data):
     model = model_fetch(model_name)
 
     model.evaluate(data)
 
+
 def data_split(data):
     data_train = data.take(int(len(data)*.75))
     data_test = data.skip(int(len(data)*.75))
     return data_train, data_test
+
+
+def model_predict(model_name, img):
+    model = model_fetch(model_name)
+    img = keras.preprocessing.image.load_img(f'{os.getcwd()}/raw-img/gatto/{img}')
+
+    img = keras.preprocessing.image.img_to_array(img)
+    img.resize((1, 256,256, 3))
+
+    predictions = model.predict(img)
+    prediction = np.where(predictions[0] == max(predictions[0]))
+    print(prediction)
+
+
 def main():
 
 
     rootdir = f'{os.getcwd()}/raw-img'
 
-    data = tf.keras.utils.image_dataset_from_directory(rootdir, shuffle=True, batch_size=100)
-    data_train, data_test = data_split(data)
+    data = tf.keras.utils.image_dataset_from_directory(rootdir, shuffle=True, batch_size=1)
+    data_train, data_test= data_split(data)
 
     model_name = 'AnimalClassifier'
     #model_train(model_name, data_train)
-    model_test(model_name,  data_test)
+    #model_test(model_name,  data_test)
+
 
 main()

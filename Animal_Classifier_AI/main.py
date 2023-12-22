@@ -1,15 +1,26 @@
-import PIL
 from tensorflow import keras
 import tensorflow as tf
 
-from PIL import Image
 import os
 
 
 def model_create():
     model = keras.Sequential([
+        keras.layers.Resizing(256, 256),
+        keras.layers.RandomFlip(mode='horizontal'),
+        keras.layers.RandomZoom(.1),
+        keras.layers.RandomContrast(.1),
+
+
+        keras.layers.Convolution2D(8, 3, activation='relu'),
         keras.layers.MaxPool2D(),
-        keras.layers.Convolution2D(10, 3, activation='relu'),
+
+        keras.layers.Convolution2D(16, 3, activation='relu'),
+        keras.layers.MaxPool2D(),
+
+        keras.layers.Convolution2D(32, 3, activation='relu'),
+        keras.layers.MaxPool2D(),
+
         keras.layers.Flatten(),
         keras.layers.Dense(256, activation='relu'),
         keras.layers.Dense(128, activation='relu'),
@@ -24,41 +35,43 @@ def model_create():
 
 def model_fetch(model):
     try:
-        model = tf.keras.models.load_model(f'ProfessionalPortfolio/Animal_Classifier_AI/{model}')
+        model = tf.keras.models.load_model(f'{os.getcwd()}/{model}')
         model.summary()
-    except FileNotFoundError:
+        return model
+    except OSError:
         print('Model not found, check spelling and try again.')
         raise FileNotFoundError
 
 
-def model_train_animal_classifier(data):
+def model_train(model_name, data):
     try:
-        model = model_fetch('AnimalClassifier')
-    except FileNotFoundError:
+        model = model_fetch(model_name)
+    except OSError:
         model = model_create()
 
     model.fit(data, epochs=10, batch_size=20)
 
-    model.save('AnimalClassifier')
+    model.save(model_name)
 
+def model_test(model_name, data):
+    model = model_fetch(model_name)
 
+    model.evaluate(data)
+
+def data_split(data):
+    data_train = data.take(int(len(data)*.75))
+    data_test = data.skip(int(len(data)*.75))
+    return data_train, data_test
 def main():
-    rootdir = f'C:\\Users\\david\\PycharmProjects\\pythonProject\\ProfessionalPortfolio\\Animal_Classifier_AI\\raw-img'
-    for subdir, dirs, files in os.walk(rootdir):
-        for directory in dirs:
-            print(directory)
-            rootdir = f'C:\\Users\\david\\PycharmProjects\\pythonProject\\ProfessionalPortfolio\\Animal_Classifier_AI\\raw-img\\{directory}'
-            for subdir, dirs, files in os.walk(rootdir):
-                for file in files:
-                    try:
-                        rootdir = f'C:\\Users\\david\\PycharmProjects\\pythonProject\\ProfessionalPortfolio\\Animal_Classifier_AI\\raw-img\\{directory}'
-                        image = Image.open(f'{rootdir}\\{file}')
-                        image = image.resize((64, 64))
-                        image.save(f'{rootdir}\\{file}')
-                    except PIL.UnidentifiedImageError:
-                        os.remove(f'{rootdir}\\{file}')
 
-    rootdir = f'C:\\Users\\david\\PycharmProjects\\pythonProject\\ProfessionalPortfolio\\Animal_Classifier_AI\\raw-img'
 
-    data = tf.keras.utils.image_dataset_from_directory(rootdir, shuffle=True)
-    model_train_animal_classifier(data)
+    rootdir = f'{os.getcwd()}/raw-img'
+
+    data = tf.keras.utils.image_dataset_from_directory(rootdir, shuffle=True, batch_size=100)
+    data_train, data_test = data_split(data)
+
+    model_name = 'AnimalClassifier'
+    #model_train(model_name, data_train)
+    model_test(model_name,  data_test)
+
+main()

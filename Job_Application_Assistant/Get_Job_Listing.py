@@ -18,16 +18,17 @@ def get_linkedIn_job_listings(job_query, city, state, radius, job_level):
     clr_keyword_list = []
     href_list = []
 
+    language = "en"
+    max_ngram_size = 1
+    deduplication_threshold = 0.9
+    numOfKeywords = 2
+
+    custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size,
+                                                dedupLim=deduplication_threshold,
+                                                top=numOfKeywords, features=None)
     while (counter < 1000):
         try:
             '''Setting up YAKE to get keywords from job details.'''
-            language = "en"
-            max_ngram_size = 1
-            deduplication_threshold = 0.9
-            numOfKeywords = 2
-            custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size,
-                                                        dedupLim=deduplication_threshold,
-                                                        top=numOfKeywords, features=None)
 
             '''Doing the initial scrape to 1. get the listings and 2. set up the eventual dict for the dataframe'''
             '''Note that I will eventually need to make this url configurable'''
@@ -88,6 +89,52 @@ def get_linkedIn_job_listings(job_query, city, state, radius, job_level):
             except TypeError:
                 print('This listing is busted, moving on')
                 pass
+
+    output = []
+    for x in clr_keyword_list:
+        output.append(x)
+    dict = {'name': name_list, 'company': company_list, 'keywords': output, 'href': href_list}
+    df = pandas.DataFrame(dict)
+    print(df)
+    return df
+
+def get_LinkedIn_job_listing_singular(url):
+    name_list = []
+    company_list = []
+    clr_keyword_list = []
+    href_list = []
+
+    language = "en"
+    max_ngram_size = 1
+    deduplication_threshold = 0.9
+    numOfKeywords = 2
+
+    custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size,
+                                                dedupLim=deduplication_threshold,
+                                                top=numOfKeywords, features=None)
+
+    print(url)
+    i_request = requests.get(url)
+    new_soup = bs4.BeautifulSoup(i_request.text, 'html.parser')
+    name = new_soup.find('h1', {'class': 'top-card-layout__title font-sans text-lg papabear:text-xl font-bold leading-open text-color-text mb-0 topcard__title'}).text.strip()
+    company = new_soup.find('a', {'class': 'topcard__org-name-link topcard__flavor--black-link'}).text.strip()
+    print(name, company)
+    new_soup = new_soup.find('body').find('div', {'class': 'decorated-job-posting__details'})
+
+    ul = new_soup.findAll('li')
+    keywords = []
+    for i in ul:
+        keywords_list = custom_kw_extractor.extract_keywords(i.text)
+        keys = pandas.DataFrame(keywords_list, columns=['word', 'score'])
+        for index, word in keys.iterrows():
+            keywords.append(word['word'])
+        del keys
+    clr_keyword_list.append(', '.join(keywords))
+    company_list.append(company)
+    name_list.append(name)
+    href_list.append(url)
+    print([len(name_list), len(clr_keyword_list), len(company_list), len(href_list)])
+
 
     output = []
     for x in clr_keyword_list:

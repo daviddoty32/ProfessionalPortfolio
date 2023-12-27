@@ -1,11 +1,11 @@
 import os
 from Generate_Documents import create_resume
 from Generate_Documents import create_cover_letter
-from Get_Job_Listing import get_linkedIn_job_listings
+from Get_Job_Listing import get_linkedIn_job_listings, get_LinkedIn_job_listing_singular
 import re
 
 
-def main():
+def main(url):
     my_skills = ['Ad-hoc Data Analysis', 'ETL', 'Data Visualization', 'Object-Oriented Programming',
                  'Python, SQL, and R', 'Database concepts', 'Business Intelligence', 'TensorFlow',
                  'Tableau and PowerBI', 'Jupityr Notebooks', 'Time-series/Multivariate analysis',
@@ -34,18 +34,25 @@ def main():
     my_number = ''
     my_email = ''
 
-    locations = ['Spring', 'The Woodlands', 'Houston', 'Conroe', 'Remote']
-    job_queries = ['Data Science', 'Data Analyst', 'Software Developer', 'Data Engineer', 'Game Developer']
+
     # So you'll see me use this in multiple different files. This is for MY computer. Change it for yours.
-    parent_path = 'C:\\Users\david\Documents\Job Search\Job Application'
+    parent_path = os.getcwd()
+    locations = ['Spring', 'The Woodlands', 'Houston', 'Conroe', 'Remote']
+    locations = ['remote']
+    job_queries = ['Data Science', 'Data Analyst', 'Software Developer', 'Data Engineer', 'Game Developer']
 
     for city in locations:
         for job_query in job_queries:
-            df = get_linkedIn_job_listings(job_query, city, 'TX', 'ENTRY_LEVEL', 35)
+            if(url == None):
+                df = get_linkedIn_job_listings(job_query, city, 'TX', 'ENTRY_LEVEL', 35)
+                job_queries = ['Data Science', 'Data Analyst', 'Software Developer', 'Data Engineer', 'Game Developer']
+            else:
+                df = get_LinkedIn_job_listing_singular(url)
 
             try:
-                df.loc[df[['name', 'company']].drop_duplicates().index].to_csv(
-                    f'{job_query.replace(" ", "_")}{city.replace(" ", "_")}JobListingAndCoverLetters.csv')
+                if(url == None):
+                    df.loc[df[['name', 'company']].drop_duplicates().index].to_csv(
+                        f'{job_query.replace(" ", "_")}{city.replace(" ", "_")}JobListingAndCoverLetters.csv')
             except AttributeError:
                 continue
 
@@ -65,4 +72,5 @@ def main():
                     print(f'{parent_path}/{company}/{filename} files Already exists')
 
 
-main()
+main(None)
+

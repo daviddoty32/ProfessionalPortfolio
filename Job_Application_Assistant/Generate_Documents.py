@@ -8,7 +8,7 @@ import re
 
 def create_cover_letter(company, name, keywords, my_name, my_skills, my_experience,
                         my_number, my_education, my_email):
-    parent_path = 'C:\\Users\david\Documents\Job Search\Job Application'
+    parent_path = os.getcwd()
     education_list = []
     experience_list = []
     for job in my_experience:
@@ -77,7 +77,7 @@ def create_cover_letter(company, name, keywords, my_name, my_skills, my_experien
 def create_resume(name, company, email, phone, education, experience, skills, keywords, job_app_title):
     # Create a PDF document
 
-    parent_path = 'C:\\Users\david\Documents\Job Search\Job Application'
+    parent_path = os.getcwd()
     filename = re.sub(r'\W+', '', job_app_title)
 
     output_file = f"{parent_path}/{company}/{filename}_resume.pdf"

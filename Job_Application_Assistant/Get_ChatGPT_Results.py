@@ -2,7 +2,7 @@ import openai
 
 
 def get_chatGPT_results(cover_letter_prompt):
-    openai.api_key = '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'  # Not gonna include MY API key
+    openai.api_key = ''  # Not gonna include MY API key
     # So you'll see me use this in multiple different files. This is for MY computer. Change it for yours.
 
     response = openai.Completion.create(

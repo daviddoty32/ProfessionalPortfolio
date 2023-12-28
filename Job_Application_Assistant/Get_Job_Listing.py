@@ -4,6 +4,7 @@ import bs4
 import requests
 import time
 import random
+from selenium import webdriver
 
 ''' Function for getting the job listings. The variables are the job query (i.e. data science, software development, etc.),
 city, state, radius away from that city, and the job_level (entry level, senior, etc)
@@ -143,3 +144,40 @@ def get_LinkedIn_job_listing_singular(url):
     df = pandas.DataFrame(dict)
     print(df)
     return df
+
+def get_single_indeed_listing(url):
+    language = "en"
+    max_ngram_size = 1
+    deduplication_threshold = 0.9
+    numOfKeywords = 2
+
+    custom_kw_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size,
+                                                dedupLim=deduplication_threshold,
+                                                top=numOfKeywords, features=None)
+    dr = webdriver.Chrome()
+    dr.get(url)
+    input('Press Enter when verified')
+
+
+    soup = bs4.BeautifulSoup(dr.page_source, 'html.parser')
+    print(soup)
+    title = soup.find('h1', {'data-testid': 'jobsearch-JobInfoHeader-title'}).find('span').text
+    print(title)
+    company = soup.find('div', {'data-testid': 'jobsearch-CompanyInfoContainer'}).find('a').text
+    print(company)
+
+    ul = soup.find('div', {'id': 'jobDescriptionText'}).findAll('li')
+    keywords = []
+    for i in ul:
+        keywords_list = custom_kw_extractor.extract_keywords(i.text)
+        keys = pandas.DataFrame(keywords_list, columns=['word', 'score'])
+        for index, word in keys.iterrows():
+            keywords.append(word['word'])
+        del keys
+    print(keywords)
+
+    dict = {'name': [title], 'company': [company], 'keywords': [keywords], 'href': [url]}
+    df = pandas.DataFrame(dict)
+    print(df)
+    return df
+

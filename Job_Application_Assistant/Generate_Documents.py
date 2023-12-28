@@ -19,8 +19,9 @@ def create_cover_letter(company, name, keywords, my_name, my_skills, my_experien
         education_list.append(f'{degree[0]} in {degree[1]} from {degree[2]} to {degree[3]} at {degree[4]}')
     education_list = ', '.join(education_list)
     filename = re.sub(r'\W+', '', name)
+    company_name= re.sub(r'\W+', '', company)
 
-    output_file = f'{parent_path}/{company}/{filename}_cover_letter.pdf'
+    output_file = f'{parent_path}/{company_name}/{filename}_cover_letter.pdf'
     keyword_string = ', '.join(keywords)
     cover_letter_prompt = f'''
         My name is {my_name}.
@@ -67,7 +68,7 @@ def create_cover_letter(company, name, keywords, my_name, my_skills, my_experien
         y_position -= 7'''
 
     try:
-        os.mkdir(f'{parent_path}\\{company}')
+        os.mkdir(f'{parent_path}/{company_name}')
     except FileExistsError:
         print('directory exists')
     # Save the PDF
@@ -78,8 +79,8 @@ def create_resume(name, company, email, phone, education, experience, skills, ke
     # Create a PDF document
 
     parent_path = os.getcwd()
-    filename = re.sub(r'\W+', '', job_app_title)
-
+    filename = re.sub(r'\W+', '', name)
+    company = re.sub(r'\W+', '', company)
     output_file = f"{parent_path}/{company}/{filename}_resume.pdf"
     education_list = []
     for degree in education:
@@ -184,7 +185,7 @@ def create_resume(name, company, email, phone, education, experience, skills, ke
         y_position -= 7'''
     # Save the PDF
     try:
-        os.mkdir(f'{parent_path}\\{company}')
+        os.mkdir(f'{parent_path}/{company}')
     except FileExistsError:
         print('directory exists')
 

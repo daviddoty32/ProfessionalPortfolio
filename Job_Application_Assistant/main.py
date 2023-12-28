@@ -1,11 +1,11 @@
 import os
 from Generate_Documents import create_resume
 from Generate_Documents import create_cover_letter
-from Get_Job_Listing import get_linkedIn_job_listings, get_LinkedIn_job_listing_singular
+from Get_Job_Listing import get_linkedIn_job_listings, get_LinkedIn_job_listing_singular, get_single_indeed_listing
 import re
 
 
-def main(url):
+def main(url, source):
     my_skills = ['Ad-hoc Data Analysis', 'ETL', 'Data Visualization', 'Object-Oriented Programming',
                  'Python, SQL, and R', 'Database concepts', 'Business Intelligence', 'TensorFlow',
                  'Tableau and PowerBI', 'Jupityr Notebooks', 'Time-series/Multivariate analysis',
@@ -34,7 +34,6 @@ def main(url):
     my_number = ''
     my_email = ''
 
-
     # So you'll see me use this in multiple different files. This is for MY computer. Change it for yours.
     parent_path = os.getcwd()
     locations = ['Spring', 'The Woodlands', 'Houston', 'Conroe', 'Remote']
@@ -43,14 +42,17 @@ def main(url):
 
     for city in locations:
         for job_query in job_queries:
-            if(url == None):
+            if (url == None):
                 df = get_linkedIn_job_listings(job_query, city, 'TX', 'ENTRY_LEVEL', 35)
                 job_queries = ['Data Science', 'Data Analyst', 'Software Developer', 'Data Engineer', 'Game Developer']
             else:
-                df = get_LinkedIn_job_listing_singular(url)
+                if source == 'LinkedIn':
+                    df = get_LinkedIn_job_listing_singular(url)
+                elif source == 'Indeed':
+                    df = get_single_indeed_listing(url)
 
             try:
-                if(url == None):
+                if (url == None):
                     df.loc[df[['name', 'company']].drop_duplicates().index].to_csv(
                         f'{job_query.replace(" ", "_")}{city.replace(" ", "_")}JobListingAndCoverLetters.csv')
             except AttributeError:
@@ -71,6 +73,16 @@ def main(url):
                 else:
                     print(f'{parent_path}/{company}/{filename} files Already exists')
 
+            if url != None:
+                break
 
-main(None)
+        if url != None:
+            break
 
+
+while (True):
+    try:
+        main(input('Enter the URL: '), 'Indeed')
+        break
+    except:
+        pass

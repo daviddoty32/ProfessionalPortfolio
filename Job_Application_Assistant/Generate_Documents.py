@@ -190,3 +190,96 @@ def create_resume(name, company, email, phone, education, experience, skills, ke
         print('directory exists')
 
     pdf_canvas.save()
+
+
+def create_cover_letter_non_chatgpt(company, name, keywords, my_name, my_skills, my_experience,
+                        my_number, my_education, my_email):
+    parent_path = os.getcwd()
+    education_list = []
+    experience_list = []
+    '''for job in my_experience:
+        experience_list.append(f'{job[0]} at {job[1]} from {job[3]}')
+    experience_list = ', '.join(experience_list)
+
+    for degree in my_education:
+        education_list.append(f'{degree[0]} in {degree[1]} from {degree[2]} to {degree[3]} at {degree[4]}')
+    education_list = ', '.join(education_list)'''
+    filename = re.sub(r'\W+', '', name)
+    company_name= re.sub(r'\W+', '', company)
+
+    output_file = f'{parent_path}/{company_name}/{filename}_cover_letter.pdf'
+    keyword_string = ', '.join(keywords)
+
+
+    text_width = 400
+
+    # Create a PDF document
+    pdf_canvas = canvas.Canvas(output_file, pagesize=letter)
+
+    # Set font and size
+    pdf_canvas.setFont("Times-Roman", 12)
+
+    # Set the position for the content
+    x_position = 75
+    y_position = 700
+
+    pdf_canvas.drawString(x_position, y_position, 'David Doty')
+    y_position -= 15
+    pdf_canvas.drawString(x_position, y_position, name)
+    y_position -= 15
+    pdf_canvas.drawString(x_position, y_position, company_name)
+    y_position -= 15
+    pdf_canvas.drawString(x_position, y_position, str(datetime.date.today()))
+    y_position -= 30
+
+    pdf_canvas.setFont("Times-Roman", 12)
+
+    cover_letter = text = f'''To whom it may concern,\n
+        I am writing to express my interest in the {name} position at {company}. I am a talented software developer with over two years of experience at General Motors. I am sure that my experience at General Motors, as well as my education, will make me a perfect candidate to join the {company} team.\n
+        My primary focus in my position at General Motors has been the development of ETL pipelines. I specialize in using Apache Spark to pull data from our Hadoop data lake, clean it, and store it in our Oracle database.  My familiarity with the data in our system also enabled me to perform ad-hoc data analytics for our product insights team. Because of this, I gained experience using data reporting tools like PowerBI and Tableau. I am excited to see how my ETL and data analysis experience can translate to the needs of {company}.\n
+        When I am not focusing on ETL at GM, I spend my time working on a variety of different tasks. I have worked extensively in SQL databases, API integrations, release pipelines, Unix/Bash scripting, and even training machine learning models. Throughout all of this, I am expected to help support the product in our production environment, so I have experience working on-call 24/7/365. My experience in that environment at General Motors has prepared me for similar fast-paced environments, and as a result, I know that I can fit right in at{company}.\n
+        In addition to my experience, I have extensive education with a bachelor’s degree in physics and a master’s degree in data science that will be completed in May. My education has given me the tools that have not only made me a better developer but have provided an understanding of the ML/AI landscape that will be so vitally important in all aspects of the industry for years to come. I am eager to add my knowledge to {company}.\n
+        Thank you so much for your time, and please feel free to reach out to me to further discuss this opportunity! I look forward to discussing how my skills can be a part of {company}.
+
+    '''
+    # Split the cover letter content into paragraphs
+    paragraphs = cover_letter.split('\n')
+
+    # Write each paragraph to the PDF
+    for paragraph in paragraphs:
+        for pg in wrap(paragraph.strip(), 120):
+            pdf_canvas.drawString(x_position, y_position, pg)
+            y_position -= 15  # Adjust the vertical position for the next paragraph
+        y_position -= 7
+    y_position -=8
+
+    pdf_canvas.drawString(x_position, y_position, 'With Gratitude, ')
+    y_position -= 67
+    '''This section is for keyword stuffing. Note: may ATS programs check for keyword stuffing an intentionally filter
+    out those cover letters. But hey, if you wanna try your luck, go for it.'''
+
+    with open('Signature.png') as img:
+        pdf_canvas.drawInlineImage('Signature.png',x_position,y_position, 230, 60)
+
+    y_position -= 15
+    pdf_canvas.drawString(x_position, y_position, 'David Doty')
+    try:
+        os.mkdir(f'{parent_path}/{company_name}')
+    except FileExistsError:
+        print('directory exists')
+    # Save the PDF
+    pdf_canvas.save()
+
+
+company = 'TEST'
+name = 'TEST'
+keywords = ['TEST']
+my_name = 'TEST'
+my_skills = 'TEST'
+my_experience  = 'TEST'
+my_number = 'TEST'
+my_education = 'TEST'
+my_email = 'TEST'
+create_cover_letter(company, name, keywords, my_name, my_skills, my_experience,
+                        my_number, my_education, my_email)
+
